@@ -3,6 +3,7 @@
 from json import dumps
 import os
 import sys
+from urllib import quote
 
 from fom.session import Fluid
 
@@ -20,8 +21,11 @@ datasets = [
             'European Convention for the Protection of Human Rights and Fundamental Freedoms 1950',
             'European Convention for the Protection of Human Rights and Fundamental Freedoms 1950, First Protocol, art 1.',
             'RIX LJ',
+            'RIX LJJ',
             'ETHERTON LJ',
+            'ETHERTON LJJ',
             'JACKSON LJ',
+            'JACKSON LJJ',
             'Philip Coppel QC',
             'Clive Lewis QC',
             'Timothy Pitt-Payne QC',
@@ -38,6 +42,8 @@ datasets = [
     {
         'about': [
             'https://www.lexisnexis.com/uk/legal/docview/getDocForCuiReq?lni=5295-21X1-DYBR-30J2&csi=274640&oc=00240&perma=true&elb=t',
+            'https://www.lexisnexis.com/uk/legal/auth/checkbrowser.do?t=1341449914069&bhcp=1',
+            'https://www.lexisnexis.com/uk/legal/docview/getDocForCuiReq?perma=true&oc=00240&lni=5295-21X1-DYBR-30J2&csi=274640&elb=t&secondRedirectIndicator=true',
         ],
         'data': [
             {
@@ -225,7 +231,8 @@ def importData():
             count = len(dataset['data'])
             print 'Adding %d URL%s to %r' % (
                 count, ('' if count == 1 else 's'), about)
-            fdb.about[about.lower()][TAG].put(dumps(dataset['data']))
+            fdb.about[quote(about.lower(), safe='')][TAG].put(
+                dumps(dataset['data']))
 
 
 if __name__ == '__main__':
