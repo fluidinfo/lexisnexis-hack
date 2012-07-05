@@ -2,6 +2,7 @@
 
 from json import dumps
 import os
+import sys
 
 from fom.session import Fluid
 
@@ -14,7 +15,6 @@ datasets = [
     {
         'about': [
             'Audit',
-            'Inspection rights',
             'Confidentiality',
             'Audit Commission Act 1998, s 15(1)',
             'European Convention for the Protection of Human Rights and Fundamental Freedoms 1950',
@@ -135,6 +135,11 @@ datasets = [
                 'publicationDate': '5 November 2009'
             },
             {
+                'url': 'https://www.lexisnexis.com/uk/legal/docview/getDocForCuiReq?lni=5295-21X1-DYBR-30J2&csi=274640&oc=00240&perma=true&elb=t',
+                'title': 'R (on the application of Veolia ES Nottinghamshire Ltd) v Nottinghamshire County Council (Dowen and another, interested parties)',
+                'publicationDate': '29 October 2010'
+            },
+            {
                 'url': 'https://www.lexisnexis.com/uk/legal/docview/getDocForCuiReq?lni=52DB-KR91-DYBP-P1CY&csi=274662&oc=00240&perma=true&elb=t',
                 'title': 'R (on the application of Betting Shop Services Ltd) v Southend-on-Sea Borough Council',
                 'publicationDate': '14 January 2008'
@@ -191,6 +196,38 @@ datasets = [
     # },
 ]
 
-for dataset in datasets:
-    for about in dataset['about']:
-        fdb.about[about.lower()][TAG].put(dumps(dataset['data']))
+def checkData():
+    """Check that there are no about value duplicates in the data."""
+    error = False
+    seenAbout = {}
+
+    # Check that no about value is used more than once (if it is we would be
+    # overwriting its value with later data, which is clearly an error).
+    for dataset in datasets:
+        for about in dataset['about']:
+            if about in seenAbout:
+                print >>sys.stderr, (
+                    'About value %r appears multiple times in the input data!'
+                    % about)
+                error = True
+            else:
+                seenAbout[about] = None
+
+    if error:
+        print >>sys.stderr, 'Exiting due to duplicate about value errors.'
+        sys.exit(1)
+
+
+def importData():
+    """Import the data to Fluidinfo."""
+    for dataset in datasets:
+        for about in dataset['about']:
+            count = len(dataset['data'])
+            print 'Adding %d URL%s to %r' % (
+                count, ('' if count == 1 else 's'), about)
+            fdb.about[about.lower()][TAG].put(dumps(dataset['data']))
+
+
+if __name__ == '__main__':
+    checkData()
+    importData()
